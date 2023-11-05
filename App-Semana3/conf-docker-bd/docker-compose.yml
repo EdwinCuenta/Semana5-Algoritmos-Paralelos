@@ -1,0 +1,17 @@
+version: '3'
+services:
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: edwinacevedo
+      POSTGRES_PASSWORD: 1182709
+      POSTGRES_DB: edwinacevedo
+    ports:
+      - "5432:5433"
+    networks:
+      - mynetwork
+
+      
+networks:
+  mynetwork:
+    external: true

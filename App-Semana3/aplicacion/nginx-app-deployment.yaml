@@ -1,0 +1,111 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-app-service
+spec:
+  selector:
+    app: nginx-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+    - protocol: TCP
+      port: 443
+      targetPort: 443
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-app-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-app
+  template:
+    metadata:
+      labels:
+        app: nginx-app
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+        volumeMounts:
+        - name: nginx-conf
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+        resources:
+          limits:
+            memory: "512Mi"  
+            cpu: "1"      
+          requests:
+            memory: "256Mi"  
+            cpu: "0.5"      
+      - name: app
+        ports:
+        - containerPort: 8080
+        env:
+        - name: PORT
+          value: "8080"
+        - name: DB_HOST
+          value: "postgres-service"
+        - name: DB_USER
+          value: "edwinacevedo"
+        - name: DB_PASSWORD
+          value: "1182709"
+        - name: DB_NAME
+          value: "edwinacevedo"
+        - name: DB_PORT
+          value: "5432"
+        resources:
+          limits:
+            memory: "1024Mi"  # Límite de memoria (por ejemplo, 256 megabytes)
+            cpu: "1"       # Límite de CPU (por ejemplo, 0.5 núcleos)
+          requests:
+            memory: "256Mi"  # Recursos mínimos de memoria solicitados (por ejemplo, 128 megabytes)
+            cpu: "0.5"       # Recursos mínimos de CPU solicitados (por ejemplo, 0.1 núcleos)
+      volumes:
+      - name: nginx-conf
+        configMap:
+          name: nginx-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  nginx.conf: |
+    events {
+        worker_connections 1024;
+    }
+
+    http {
+        server {
+            listen 80;
+            server_name localhost;
+            return 301 https://$host$request_uri;
+        }
+
+        server {
+            listen 443 ssl;
+            server_name localhost;
+            ssl_certificate /nginx/cert.pem;
+            ssl_certificate_key /nginx/private.key;
+
+            ssl_protocols TLSv1.2 TLSv1.3;
+            ssl_prefer_server_ciphers on;
+
+            location / {
+                proxy_pass http://app:8080;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection 'upgrade';
+                proxy_set_header Host $host;
+                proxy_cache_bypass $http_upgrade;
+            }
+        }
+    }
+
