@@ -11,7 +11,6 @@ provider "digitalocean" {
 }
 
 
-
 resource "digitalocean_droplet" "crud" {
   image    = "ubuntu-20-04-x64"
   name     = "peliculasserver"
