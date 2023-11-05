@@ -21,7 +21,7 @@ pipeline {
                     branches: [[name: '*/main']], 
                     extensions: [], 
                     userRemoteConfigs: [[
-                        url: 'https://github.com/GeorgesGil/app-semana-05.git'
+                        url: 'https://github.com/EdwinCuenta/Semana5-Algoritmos-Paralelos.git'
                     ]]
                 ])
           
