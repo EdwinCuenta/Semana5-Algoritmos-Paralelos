@@ -13,7 +13,7 @@ provider "digitalocean" {
 
 
 resource "digitalocean_droplet" "crud" {
-  image    = "docker-20-04"
+  image    = "ubuntu-20-04-x64"
   name     = "peliculasserver"
   region   = "nyc3"
   size     = "s-1vcpu-1gb"
