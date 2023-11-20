@@ -14,7 +14,7 @@ variable "tokenapi" {
 
 
 //keys
-variable "public_key" {
+variable "public_key" {   
     type = string
     description = "Public Key"
     
